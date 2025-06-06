@@ -180,4 +180,29 @@ export async function instructorLogIn(formData: FormData) {
 
     revalidatePath("/", "layout");
     return { error: null, status: 200, user: data.user };
+};
+
+export async function getUserSession() {
+	const supabase = await createClient();
+
+	const { data, error } = await supabase.auth.getUser();
+	if (error) {
+		return { error: error.message, status: error.status, user: null };
+	}
+	if (!data) {
+		return { error: "No session found", status: 404, user: null };
+	}
+	return { error: null, status: 200, user: data.user };
+}
+
+export async function logOut() {
+	const supabase = await createClient();
+	const { error } = await supabase.auth.signOut();
+
+	if (error) {
+		redirect("/error");
+	}
+
+	revalidatePath("/", "layout");
+	redirect("/student/auth/login");
 }
